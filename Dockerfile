@@ -1,27 +1,20 @@
-FROM python:3-alpine
-ENV TARGETARCH="linux-musl-x64"
+FROM ubuntu:22.04
 
-# Another option:
-# FROM arm64v8/alpine
-# ENV TARGETARCH="linux-musl-arm64"
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apk update && \
-  apk upgrade && \
-  apk add bash curl gcc git icu-libs jq musl-dev python3-dev libffi-dev openssl-dev cargo make
+RUN apt-get update && apt-get install -y \
+    curl git jq ca-certificates unzip tar \
+    libssl3 libicu70 libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Azure CLI
-RUN pip install --upgrade pip
-RUN pip install azure-cli
+# agent user (nem root!)
+RUN useradd -m -d /azp agent
+WORKDIR /azp
 
-WORKDIR /azp/
+# copy entrypoint
+COPY start.sh /azp/start.sh
+RUN chmod +x /azp/start.sh
 
-COPY ./start.sh ./
-RUN chmod +x ./start.sh
-
-RUN adduser -D agent
-RUN chown agent ./
 USER agent
-# Another option is to run the agent as root.
-# ENV AGENT_ALLOW_RUNASROOT="true"
 
-ENTRYPOINT [ "./start.sh" ]
+ENTRYPOINT ["/azp/start.sh"]
