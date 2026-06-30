@@ -17,7 +17,7 @@ AZP_AGENT_NAME=${AZP_AGENT_NAME:-$(hostname)}
 echo "Downloading Azure DevOps agent..."
 
 curl -fSL -o agent.tar.gz \
-  https://vstsagentpackage.azureedge.net/agent/3.246.0/vsts-agent-linux-x64-3.246.0.tar.gz
+  https://download.agent.dev.azure.com/agent/3.246.0/vsts-agent-linux-x64-3.246.0.tar.gz
 
 tar -xzf agent.tar.gz
 rm agent.tar.gz
