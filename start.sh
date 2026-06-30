@@ -1,28 +1,25 @@
 #!/bin/bash
 set -e
 
-echo "Starting Azure DevOps Agent..."
+echo "Getting latest Azure DevOps agent version..."
 
-cd /azp
+AGENT_VERSION=$(curl -s https://api.github.com/repos/microsoft/azure-pipelines-agent/releases/latest \
+  | grep '"tag_name"' \
+  | cut -d '"' -f 4 \
+  | sed 's/v//')
 
-# validation
-if [ -z "$AZP_URL" ] || [ -z "$AZP_TOKEN" ]; then
-  echo "ERROR: AZP_URL or AZP_TOKEN missing"
-  exit 1
-fi
+echo "Latest version detected: $AGENT_VERSION"
 
-AZP_POOL=${AZP_POOL:-Default}
-AZP_AGENT_NAME=${AZP_AGENT_NAME:-$(hostname)}
+AGENT_URL="https://download.agent.dev.azure.com/agent/${AGENT_VERSION}/vsts-agent-linux-x64-${AGENT_VERSION}.tar.gz"
 
-echo "Downloading Azure DevOps agent..."
+echo "Downloading agent from: $AGENT_URL"
 
-curl -fSL -o agent.tar.gz \
-  https://download.agent.dev.azure.com/agent/3.246.0/vsts-agent-linux-x64-3.246.0.tar.gz
+curl -LsS "$AGENT_URL" -o agent.tar.gz
 
-tar -xzf agent.tar.gz
-rm agent.tar.gz
+mkdir -p /azp/agent
+tar -zxf agent.tar.gz -C /azp/agent
 
-echo "Configuring agent..."
+cd /azp/agent
 
 ./config.sh --unattended \
   --url "$AZP_URL" \
@@ -30,15 +27,6 @@ echo "Configuring agent..."
   --token "$AZP_TOKEN" \
   --pool "$AZP_POOL" \
   --agent "$AZP_AGENT_NAME" \
-  --acceptTeeEula \
-  --replace
+  --work _work
 
-cleanup() {
-  echo "Removing agent..."
-  ./config.sh remove --unattended --auth pat --token "$AZP_TOKEN" || true
-}
-
-trap cleanup EXIT
-
-echo "Running agent..."
 ./run.sh
