@@ -1,21 +1,27 @@
-FROM ubuntu:22.04
+FROM python:3-alpine
+ENV TARGETARCH="linux-musl-x64"
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Another option:
+# FROM arm64v8/alpine
+# ENV TARGETARCH="linux-musl-arm64"
 
-RUN apt-get update && apt-get install -y \
-    curl git jq ca-certificates unzip tar \
-    libssl3 libicu70 libstdc++6 \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+  apk upgrade && \
+  apk add bash curl gcc git icu-libs jq musl-dev python3-dev libffi-dev openssl-dev cargo make
 
-RUN useradd -m -d /azp agent
-WORKDIR /azp
+# Install Azure CLI
+RUN pip install --upgrade pip
+RUN pip install azure-cli
 
-RUN curl -Ls https://vstsagentpackage.azureedge.net/agent/3.246.0/vsts-agent-linux-x64-3.246.0.tar.gz \
-    | tar -xz
+WORKDIR /azp/
 
-COPY start.sh .
-RUN chmod +x start.sh
+COPY ./start.sh ./
+RUN chmod +x ./start.sh
 
+RUN adduser -D agent
+RUN chown agent ./
 USER agent
+# Another option is to run the agent as root.
+# ENV AGENT_ALLOW_RUNASROOT="true"
 
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT [ "./start.sh" ]
