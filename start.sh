@@ -22,6 +22,7 @@ tar -zxf agent.tar.gz -C /azp/agent
 cd /azp/agent
 
 ./config.sh --unattended \
+  --replace \
   --url "$AZP_URL" \
   --auth pat \
   --token "$AZP_TOKEN" \
