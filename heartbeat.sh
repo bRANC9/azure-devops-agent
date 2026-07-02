@@ -16,6 +16,10 @@ log() {
   echo "[heartbeat] $*" >&2
 }
 
+urlencode() {
+  jq -rn --arg v "$1" '$v | @uri'
+}
+
 derive_org() {
   local url="${1%/}"
   if [[ "$url" =~ ^https?://dev\.azure\.com/([^/]+)$ ]]; then
@@ -41,7 +45,7 @@ fi
 SANITIZED_POOL="$(echo "${AZP_POOL:-default}" | tr -c 'A-Za-z0-9_' '_' | tr '[:lower:]' '[:upper:]')"
 HEARTBEAT_VAR="${AZP_HEARTBEAT_VARIABLE:-AGENT_POOL_${SANITIZED_POOL}_LAST_HEARTBEAT}"
 INTERVAL="${AZP_HEARTBEAT_INTERVAL:-60}"
-VG_BASE="https://dev.azure.com/${AZP_ORG_NAME}/${AZP_PROJECT}/_apis/distributedtask/variablegroups"
+VG_BASE="https://dev.azure.com/$(urlencode "$AZP_ORG_NAME")/$(urlencode "$AZP_PROJECT")/_apis/distributedtask/variablegroups"
 
 resolve_group_id() {
   local response
