@@ -30,4 +30,13 @@ cd /azp/agent
   --agent "$AZP_AGENT_NAME" \
   --work _work
 
+/azp/heartbeat.sh &
+HEARTBEAT_PID=$!
+
+cleanup() {
+  kill "$HEARTBEAT_PID" 2>/dev/null || true
+  timeout 10 /azp/heartbeat.sh --clear || true
+}
+trap cleanup EXIT INT TERM
+
 ./run.sh
