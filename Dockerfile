@@ -153,8 +153,7 @@ RUN useradd -m -d /azp -s /bin/bash agent && \
 WORKDIR /azp
 
 COPY start.sh /azp/start.sh
-COPY heartbeat.sh /azp/heartbeat.sh
-RUN chmod +x /azp/start.sh /azp/heartbeat.sh && \
+RUN chmod +x /azp/start.sh && \
     chown -R agent:agent /azp
 
 USER agent
