@@ -67,6 +67,15 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
 
 # -----------------------------------------------------------------------------
+# pnpm (via Corepack, bundled with Node.js)
+# Provides the `pnpm` shim used to install project deps (e.g. vite) so
+# `pnpm install && pnpm build` works for frontend pipelines. Corepack respects
+# a project's `packageManager` field and fetches the matching version on demand.
+# -----------------------------------------------------------------------------
+RUN corepack enable && \
+    corepack prepare pnpm@latest --activate
+
+# -----------------------------------------------------------------------------
 # Docker CLI
 # -----------------------------------------------------------------------------
 RUN install -m 0755 -d /etc/apt/keyrings && \
@@ -137,6 +146,7 @@ RUN git --version && \
     az version && \
     node --version && \
     npm --version && \
+    pnpm --version && \
     docker --version && \
     kubectl version --client && \
     helm version && \
