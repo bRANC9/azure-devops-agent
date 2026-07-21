@@ -33,6 +33,8 @@ DOWNLOAD_URL=$(echo "$API_RESPONSE" | jq -r '
 
 if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" = "null" ]; then
     echo "Failed to determine download URL"
+    echo "$API_RESPONSE"
+    echo "$DOWNLOAD_URL"
     exit 1
 fi
 
