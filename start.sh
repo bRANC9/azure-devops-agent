@@ -3,6 +3,12 @@ set -euo pipefail
 
 echo "Getting latest Azure DevOps agent version..."
 
+echo "Calling GitHub API..."
+curl -v \
+  -H "Accept: application/vnd.github+json" \
+  -H "User-Agent: azure-devops-agent" \
+  https://api.github.com/repos/microsoft/azure-pipelines-agent/releases/latest
+
 API_RESPONSE=$(curl -fsSL \
     -H "Accept: application/vnd.github+json" \
     -H "User-Agent: azure-devops-agent" \
